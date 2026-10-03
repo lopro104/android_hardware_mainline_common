@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <aidl/android/hardware/vibrator/BnVibrator.h>
 
 #include "FFDevice.h"
@@ -58,6 +60,7 @@ class Vibrator : public BnVibrator {
                                    const std::shared_ptr<IVibratorCallback>& callback) override;
 
     std::unique_ptr<FFDeviceBase> ff_device;
+    std::atomic<float> amplitude_{1.0f};
 
   public:
     Vibrator(std::unique_ptr<FFDeviceBase> ff_device) : ff_device(std::move(ff_device)) {}

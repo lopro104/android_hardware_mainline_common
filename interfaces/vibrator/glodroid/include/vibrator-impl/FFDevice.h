@@ -16,14 +16,14 @@ namespace vibrator {
 class FFDeviceBase {
   public:
     virtual ~FFDeviceBase() = default;
-    virtual void vibrate(int duration_ms) = 0;
+    virtual void vibrate(int duration_ms, float amplitude) = 0;
     virtual void off() = 0;
 };
 
 class FFDeviceDummy : public FFDeviceBase {
   public:
     static std::unique_ptr<FFDeviceBase> create() { return std::make_unique<FFDeviceDummy>(); }
-    void vibrate(int /*duration_ms*/) override{};
+    void vibrate(int /*duration_ms*/, float /*amplitude*/) override{};
     void off() override{};
 };
 
@@ -35,7 +35,7 @@ class FFDevice : public FFDeviceBase {
     static std::unique_ptr<FFDeviceBase> create(const char* input_path);
 
     ~FFDevice() override;
-    void vibrate(int duration_ms) override;
+    void vibrate(int duration_ms, float amplitude) override;
     void off() override;
 };
 

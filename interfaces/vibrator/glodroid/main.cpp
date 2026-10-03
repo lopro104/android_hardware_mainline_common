@@ -15,6 +15,7 @@
  */
 
 #include <android-base/logging.h>
+#include <android-base/properties.h>
 #include <android/binder_manager.h>
 #include <android/binder_process.h>
 
@@ -25,11 +26,14 @@ using aidl::android::hardware::vibrator::FFDeviceBase;
 using aidl::android::hardware::vibrator::FFDeviceDummy;
 using aidl::android::hardware::vibrator::Vibrator;
 
-static const char* INPUT_PATH = "/sys/devices/platform/vibrator/input";
+static const char* DEFAULT_INPUT_PATH = "/sys/devices/platform/vibrator/input";
 
 int main() {
     ABinderProcess_setThreadPoolMaxThreadCount(0);
-    auto device = FFDevice::create(INPUT_PATH);
+    const std::string input_path =
+            android::base::GetProperty("ro.vendor.vibrator.hal.input_path", DEFAULT_INPUT_PATH);
+    LOG(INFO) << "Using FF input path " << input_path;
+    auto device = FFDevice::create(input_path.c_str());
     if (!device) {
         LOG(WARNING) << "Failed to create FFDevice, using dummy";
         device = FFDeviceDummy::create();

@@ -4,6 +4,8 @@
  * Copyright (C) 2021 GloDroid project
  */
 
+#include <algorithm>
+
 #include "vibrator-impl/FFDevice.h"
 
 #include <android-base/logging.h>
@@ -58,13 +60,15 @@ FFDevice::~FFDevice() {
     }
 }
 
-void FFDevice::vibrate(int duration_ms) {
+void FFDevice::vibrate(int duration_ms, float amplitude) {
     off();
 
     /* Prepare effect */
+    const uint16_t magnitude =
+            static_cast<uint16_t>(std::clamp(amplitude, 0.0f, 1.0f) * UINT16_MAX);
     ff_effect effect = {.type = FF_RUMBLE,
-                        .u.rumble.strong_magnitude = UINT16_MAX,
-                        .u.rumble.weak_magnitude = UINT16_MAX,
+                        .u.rumble.strong_magnitude = magnitude,
+                        .u.rumble.weak_magnitude = magnitude,
                         .replay.length = static_cast<uint16_t>(duration_ms),
                         .replay.delay = 0,
                         .id = -1 /* set to -1 for allocate new effect */};

@@ -57,7 +57,7 @@ ndk::ScopedAStatus Vibrator::off() {
 ndk::ScopedAStatus Vibrator::on(int32_t timeoutMs,
                                 const std::shared_ptr<IVibratorCallback>& callback) {
     LOG(INFO) << "Vibrator on for timeoutMs: " << timeoutMs;
-    ff_device->vibrate(timeoutMs);
+    ff_device->vibrate(timeoutMs, amplitude_);
 
     if (callback != nullptr) {
         std::thread([=] {
@@ -86,8 +86,11 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength strength,
     }
 
     constexpr size_t kEffectMillis = 100;
+    const float amplitude = strength == EffectStrength::LIGHT    ? 0.5f
+                            : strength == EffectStrength::MEDIUM ? 0.75f
+                                                                 : 1.0f;
 
-    ff_device->vibrate(kEffectMillis);
+    ff_device->vibrate(kEffectMillis, amplitude);
 
     if (callback != nullptr) {
         std::thread([=] {
@@ -112,6 +115,7 @@ ndk::ScopedAStatus Vibrator::setAmplitude(float amplitude) {
     if (amplitude <= 0.0f || amplitude > 1.0f) {
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_ILLEGAL_ARGUMENT));
     }
+    amplitude_ = amplitude;
     return ndk::ScopedAStatus::ok();
 }
 
@@ -189,7 +193,7 @@ ndk::ScopedAStatus Vibrator::compose(const std::vector<CompositeEffect>& composi
 
             int32_t durationMs;
             getPrimitiveDuration(e.primitive, &durationMs);
-            ff_device->vibrate(durationMs);
+            ff_device->vibrate(durationMs, e.scale);
             usleep(durationMs * 1000);
         }
 
